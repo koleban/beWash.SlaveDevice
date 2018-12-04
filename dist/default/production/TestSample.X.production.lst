@@ -1,7 +1,7 @@
 
 
 Microchip Technology PIC18 LITE Macro Assembler V2.00 build -1524193055 
-                                                                                               Tue Dec 04 22:18:38 2018
+                                                                                               Tue Dec 04 23:29:10 2018
 
 Microchip Technology Omniscient Code Generator v2.00 (Free mode) build 20180527130849
      1  0000                     
@@ -485,8 +485,8 @@ Microchip Technology Omniscient Code Generator v2.00 (Free mode) build 201805271
    391  0000                     # 6 "main.c"
    392                           psect eeprom_data,class=EEDATA,noexec ;# 
    393                           # 6 "main.c"
-   394                           db 0x00,2,0x25,0x80,250,250,100,100 ;# 
-   395  F00000  00 02 25 80 FA FA 64 64 # 7 "main.c"
+   394                           db 0x00,1,0x25,0x80,250,250,100,100 ;# 
+   395  F00000  00 01 25 80 FA FA 64 64 # 7 "main.c"
    396                           psect eeprom_data,class=EEDATA,noexec ;# 
    397                           # 7 "main.c"
    398                           db 250,250,250,250,0x00,0x00,0x00,0x00 ;# 
@@ -1224,7 +1224,7 @@ Microchip Technology Omniscient Code Generator v2.00 (Free mode) build 201805271
   1130                           __CFG_EBTR1$OFF equ 0x0
   1131  0000                     global __CFG_EBTRB$OFF
   1132                           __CFG_EBTRB$OFF equ 0x0
-  1133  0000                     	file	"C:\Users\KSV\AppData\Local\Temp\2\s3qg."
+  1133  0000                     	file	"C:\Users\KSV\AppData\Local\Temp\2\s6v0."
   1134                           	line	#
   1135                           psect	cinit,class=CODE,delta=1,reloc=2
   1136                           global __pcinit
@@ -1256,7 +1256,7 @@ Microchip Technology Omniscient Code Generator v2.00 (Free mode) build 201805271
   1162  00007C                     	global	_MODBUS
   1163                           _MODBUS:
   1164  00007C                            ds      262
-  1165  00007C                     	file	"C:\Users\KSV\AppData\Local\Temp\2\s3qg."
+  1165  00007C                     	file	"C:\Users\KSV\AppData\Local\Temp\2\s6v0."
   1166                           	line	#
   1167                           psect	cinit
   1168                           ; Clear objects allocated to BIGRAM (262 bytes)
@@ -6581,7 +6581,7 @@ CODE                 0      0       0       0        0.0%
 
 
 Microchip Technology PIC18 Macro Assembler V2.00 build -1524193055 
-Symbol Table                                                                                   Tue Dec 04 22:18:38 2018
+Symbol Table                                                                                   Tue Dec 04 23:29:10 2018
 
             __size_of_BAUD_CALC 0064                              l70 0246                              l71 05BC  
                             l80 0334                              l72 0316                              l81 03EC  

@@ -4465,7 +4465,7 @@ void TX_ERROR(UART_DATA *MODBUS,unsigned char error_type);
 void TX_FRAME(UART_DATA *MODBUS);
 
 # 6 "main.c"
-asm("\tpsect eeprom_data,class=EEDATA,noexec"); asm("\tdb\t" "0x00" "," "2" "," "0x25" "," "0x80" "," "250" "," "250" "," "100" "," "100");
+asm("\tpsect eeprom_data,class=EEDATA,noexec"); asm("\tdb\t" "0x00" "," "1" "," "0x25" "," "0x80" "," "250" "," "250" "," "100" "," "100");
 asm("\tpsect eeprom_data,class=EEDATA,noexec"); asm("\tdb\t" "250" "," "250" "," "250" "," "250" "," "0x00" "," "0x00" "," "0x00" "," "0x00");
 
 volatile unsigned long ticks = 0;
