@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=TestSample.X
+PROJECTNAME=PIC_ImpCounter_RS485.X
 
 # Active Configuration
 DEFAULTCONF=default

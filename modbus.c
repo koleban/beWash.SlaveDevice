@@ -99,14 +99,26 @@ void TX_16(UART_DATA *MODBUS)
 
    regAddr=((MODBUS->buffer[2]<<8)+MODBUS->buffer[3]);                          /*adress*/
    regCount=((MODBUS->buffer[4]<<8)+MODBUS->buffer[5]); // Количество регистров для записи
-   /*если в нашем адресном пространстве*/
 
+   /*если в нашем адресном пространстве*/
     if((regAddr+regCount) <= OBJ_SZ)
     {
        j=7;
        for (unsigned int i=regAddr; i < (regAddr + regCount);i++)
        {
-            res_table[i].Val=(MODBUS->buffer[j]<<8)+MODBUS->buffer[j+1];
+	   // Если это регистры накопленых импульсов то минусуем
+	   // в остальные пишем так как есть
+	    if ((i == REG_IN1_COUNTER) || (i == REG_IN2_COUNTER))
+	    {
+		if (res_table[i].Val >= (MODBUS->buffer[j]<<8)+MODBUS->buffer[j+1])
+		    res_table[i].Val = res_table[i].Val - (MODBUS->buffer[j]<<8)+MODBUS->buffer[j+1];
+		else
+		    res_table[i].Val = 0;
+	    }
+	    else
+	    {
+		res_table[i].Val=(MODBUS->buffer[j]<<8)+MODBUS->buffer[j+1];
+	    }
             j+=2;
         }
        MODBUS->txlen=8;

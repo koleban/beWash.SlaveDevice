@@ -14,14 +14,22 @@ void pic_init(void)
     ANSELH  = 0x00;
     SLRCON  = 0x00;
 
+    //*********************
+    //***  PORTA
     PORTA   = 0;                            /*После инициализации порта C, все пины в низкий уровень*/
+    //          76543210
     TRISA   = 0b00000011;                   /*Пины порта C настроены на выход RA0 и RA1 вход*/
+    //*********************
+    //***  PORTB
     PORTB   = 0;                            /*После инициализации порта C, все пины в низкий уровень*/
-    TRISB   = 0b00000000;                   /*Пины порта C настроены на выход*/
-    PORTB   = 0;                            /*После инициализации порта C, все пины в низкий уровень*/
+    //          76543210
+    TRISB   = 0b01010000;                   /*Пины порта C настроены на выход*/
+    //*********************
+    //***  PORTC
     PORTC   = 0;                            /*После инициализации порта C, все пины в низкий уровень*/
+    //          76543210
     TRISC   = 0b10110000;                   /*Пины порта C настроены на выход и RC4 RC5 RC7 вход*/
-    
+
     //TRISBbits.RB4 = 1;
     //TRISBbits.RB6 = 0;
 
@@ -46,8 +54,6 @@ void pic_init(void)
 
 void load_data_from_eeprom(void)
 {
-    BYTE crc_out = 0xAA;
-    BYTE crc = read_eeprom_my(0);
     memset(res_table, 0, sizeof(res_table));
 
     CLRWDT();
@@ -64,54 +70,21 @@ void load_data_from_eeprom(void)
     res_table[4].byte.LB=read_eeprom_my(9);             /*Ширина паузы между импульсами*/
     res_table[5].byte.HB=read_eeprom_my(10);		/*Ширина импульса*/
     res_table[5].byte.LB=read_eeprom_my(11);            /*Ширина паузы между импульсами*/
-    
+
     CLRWDT();
-    for (int i=0; i<6; i++)
-	crc_out ^= (res_table[i].byte.HB ^res_table[i].byte.LB);
-        
-    if (get_mbaddr_from_pin() != 0)
-	addr = get_mbaddr_from_pin();                     /*Устанавливаем модбас адрес устройства*/
-        
-    CLRWDT();
-    if (crc_out != crc)
-    {
-        addr=get_mbaddr_from_pin();                     /*Устанавливаем модбас адрес устройства*/
-        res_table[0].byte.HB=0x00;			/*В карту регистров модбас записываем адрес устройства*/
-        res_table[0].byte.LB=addr;			/*В карту регистров модбас записываем адрес устройства*/
-        res_table[1].byte.HB=0x25;			/*Скорость обмена старший байт*/
-        res_table[1].byte.LB=0x80;			/*Скорость обмена младший байт*/
-        res_table[2].byte.HB=100;			/*Ширина импульса*/
-        res_table[2].byte.LB=100;			/*Ширина паузы между импульсами*/
-        res_table[3].byte.HB=100;			/*Ширина импульса*/
-        res_table[3].byte.LB=100;			/*Ширина паузы между импульсами*/
-        res_table[4].byte.HB=100;			/*Ширина импульса*/
-        res_table[4].byte.LB=100;			/*Ширина паузы между импульсами*/
-        res_table[5].byte.HB=100;			/*Ширина импульса*/
-        res_table[5].byte.LB=100;			/*Ширина паузы между импульсами*/
-	CLRWDT();
-        for (int i=0; i<6; i++)
-	    crc_out ^= (res_table[i].byte.HB ^res_table[i].byte.LB);
-	CLRWDT();
-	res_table[0].byte.HB = crc_out;
-	CLRWDT();
-	for (int i=0; i<6; i++)
-	{
-	    CLRWDT();
-	    write_eeprom_my(i*2,res_table[i].byte.HB);
-	    CLRWDT();
-	    write_eeprom_my(i*2+1,res_table[i].byte.LB);
-	}
-	res_table[0].byte.HB = 0x00;
-    }
+
+    BYTE hw_addr = get_mbaddr_from_pin();
+    if (hw_addr != 0)
+	addr = hw_addr;                     /*Устанавливаем модбас адрес устройства*/
 }
 
 BYTE get_mbaddr_from_pin(void)
 {
     BYTE sw_value = 0;
-    sw_value += (SW4 << 3);
-    sw_value += (SW3 << 2);
-    sw_value += (SW2 << 1);
-    sw_value += (SW1);
+    sw_value += (BYTE)(SW4 << 3);
+    sw_value += (BYTE)(SW3 << 2);
+    sw_value += (BYTE)(SW2 << 1);
+    sw_value += (BYTE)(SW1);
     if (sw_value == 0)
 	sw_value = 100;
     return sw_value;
@@ -121,7 +94,7 @@ void uart_init(WORD serialSpeed)
 {
 
     serialSpeed = 9600;
-    
+
     TX_TRIS = 0;                          /*пин выхода УАРТа настроен на выход*/
     RX_TRIS = 1;                          /*пин входа УАРТа настроен на вход*/
     TX_TRANS = 0;                         /*Пин управления направлением передачи RS-485 на выход*/
@@ -165,9 +138,9 @@ CHAR read_eeprom_my (CHAR addr)
 
 void write_eeprom_my (CHAR addr, CHAR eeval)
 {
-    EEADR = addr;   
+    EEADR = addr;
     EEDATA = eeval;
-    EECON1bits.EEPGD = 0;   
+    EECON1bits.EEPGD = 0;
     EECON1bits.CFGS = 0;
     EECON1bits.WREN = 1;
     BYTE bk = INTCONbits.GIE;

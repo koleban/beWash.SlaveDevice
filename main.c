@@ -3,8 +3,8 @@
 #include "init.h"
 #include "modbus.h"
 
-__EEPROM_DATA (0x00, MODBUS_ADDR,0x25,0x80,250,250,100,100);
-__EEPROM_DATA (250,250,250,250,0x00, 0x00,0x00, 0x00);
+__EEPROM_DATA (0x00, MODBUS_ADDR,0x25,0x80,100,100,100,100);
+__EEPROM_DATA (100,100,100,100,0x00, 0x00,0x00, 0x00);
 
 volatile unsigned long ticks = 0;
 volatile BYTE rl4state = 0;
@@ -93,79 +93,99 @@ void main(void)
             MODBUS.rxgap=0;
         }
 	
+	RL1 = 0;
+	int timePulse = 0;
+	while ((IN1 == 0) && (timePulse < (PULSE_MAX_WIDTH+200)))
+	{
+	    timePulse++;
+	    __delay_ms(1);
+	    // Фильтр помех IN1 - RL1 настоеный на импульс не менее PULSE_MIN_WIDTH
+	    // >>>>>>
+	    // Пропускаем импульс, только если он длиннее чем PULSE_MIN_WIDTH
+	    if ((addr == 99) && (timePulse >= PULSE_MIN_WIDTH))
+		RL1 = 1;
+	    // <<<<<<
+	}
+	if ((timePulse >= PULSE_MIN_WIDTH) && (timePulse <= PULSE_MAX_WIDTH))
+	{
+	    res_table[11].Val++;
+	    // Фильтр помех IN1 - RL1 настоеный на импульс не менее PULSE_MIN_WIDTH
+	    // >>>>>>
+	    // Добиваем ширину имульса до того, что получили
+	    if (addr == 99)
+    		__delay_ms(PULSE_MIN_WIDTH);
+	    // <<<<<<
+	}
+	RL1 = 0;
+	if (timePulse > PULSE_MAX_WIDTH)
+	{
+	    timePulse = 0;
+	    for (int tmp = 0; tmp < 3; tmp++)
+	    {
+		RL4 = 1;
+		RL3 = 1;
+		__delay_ms(200);
+		RL4 = 0;
+		RL3 = 0;
+		__delay_ms(100);
+	    }
+	    RL4 = 0;
+	    RL3 = 0;
+	}
+	    
+	timePulse = 0;
+	while ((IN2 == 0) && (timePulse < (PULSE_MAX_WIDTH+200)))
+	{
+	    timePulse++;
+	    __delay_ms(1);
+	}
+	if ((timePulse >= PULSE_MIN_WIDTH) && (timePulse <= PULSE_MAX_WIDTH))
+	{
+	   res_table[12].Val++; 
+	}
+	if (timePulse > PULSE_MAX_WIDTH)
+	{
+	    for (int tmp = 0; tmp < 5; tmp++)
+	    {
+		RL4 = 1;
+		RL3 = 1;
+		__delay_ms(200);
+		RL4 = 0;
+		RL3 = 0;
+		__delay_ms(100);
+	    }
+	    RL4 = 0;
+	    RL3 = 0;
+	}
+	    
 	if (MODBUS.write)
 	{
 	    INTCONbits.GIE=0;                                             /* время передачи отключим прерывания*/
-	    // IMPULSE RL1
-	    int cnt = res_table[6].Val;
-	    res_table[6].Val = 0;
-	    for (int i=0; i< cnt; i++)
+	    for (int rlIndex = 0; rlIndex < 4; rlIndex++)
 	    {
-		RL1 = 1;
-		for (int m=0; m < res_table[2].byte.HB; m++)
+		// IMPULSE RL1 - RL4
+		int cnt = res_table[rlIndex+6].Val;
+		res_table[rlIndex+6].Val = 0;
+		for (int i=0; i< cnt; i++)
 		{
-		    CLRWDT();
-		    __delay_ms(1);
-		}
-		RL1 = 0;
-		for (int m=0; m < res_table[2].byte.LB; m++)
-		{
-		    CLRWDT();
-		    __delay_ms(1);
-		}
-	    }
-	    // IMPULSE RL2
-	    cnt = res_table[7].Val;
-	    res_table[7].Val = 0;
-	    for (int i=0; i< cnt; i++)
-	    {
-		RL2 = 1;
-		for (int m=0; m < res_table[3].byte.HB; m++)
-		{
-		    CLRWDT();
-		    __delay_ms(1);
-		}
-		RL2 = 0;
-		for (int m=0; m < res_table[3].byte.LB; m++)
-		{
-		    CLRWDT();
-		    __delay_ms(1);
-		}
-	    }
-	    // IMPULSE RL3
-	    cnt = res_table[8].Val;
-	    res_table[8].Val = 0;
-	    for (int i=0; i< cnt; i++)
-	    {
-		RL3 = 1;
-		for (int m=0; m < res_table[4].byte.HB; m++)
-		{
-		    CLRWDT();
-		    __delay_ms(1);
-		}
-		RL3 = 0;
-		for (int m=0; m < res_table[4].byte.LB; m++)
-		{
-		    CLRWDT();
-		    __delay_ms(1);
-		}
-	    }
-	    // IMPULSE RL4
-	    cnt = res_table[9].Val;
-	    res_table[9].Val = 0;
-	    for (int i=0; i< cnt; i++)
-	    {
-		RL4 = 1;
-		for (int m=0; m < res_table[5].byte.HB; m++)
-		{
-		    CLRWDT();
-		    __delay_ms(1);
-		}
-		RL4 = 0;
-		for (int m=0; m < res_table[5].byte.LB; m++)
-		{
-		    CLRWDT();
-		    __delay_ms(1);
+		    if (rlIndex == 0) RL1 = 1;
+		    if (rlIndex == 1) RL2 = 1;
+		    if (rlIndex == 2) RL3 = 1;
+		    if (rlIndex == 3) RL4 = 1;
+		    for (int m=0; m < res_table[rlIndex+2].byte.HB; m++)
+		    {
+			CLRWDT();
+			__delay_ms(1);
+		    }
+		    if (rlIndex == 0) RL1 = 0;
+		    if (rlIndex == 1) RL2 = 0;
+		    if (rlIndex == 2) RL3 = 0;
+		    if (rlIndex == 3) RL4 = 0;
+		    for (int m=0; m < res_table[rlIndex+2].byte.LB; m++)
+		    {
+			CLRWDT();
+			__delay_ms(1);
+		    }
 		}
 	    }
 	    INTCONbits.GIE=1;
